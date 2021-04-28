@@ -1,0 +1,256 @@
+Section 1 : MSSQL DB
+
+-----UC1-----------creating database payroll_service
+
+ CREATE DATABASE PAYROLL_SERVICE;
+Query OK, 1 row affected (0.10 sec)
+
+mysql> SHOW DATABASES;
++--------------------+
+| Database           |
++--------------------+
+| information_schema |
+| mysql              |
+| payroll_service    |
+| performance_schema |
+| sakila             |
+| sys                |
+| world              |
++--------------------+
+ mysql>USE PAYROLL_SERVICE;
+Database changed
+
+---------UC2-----------creating table employee_service
+
+mysql> SELECT DATABASE();
++-----------------+
+| DATABASE()      |
++-----------------+
+| payroll_service |
++-----------------+
+1 row in set (0.00 sec)
+
+mysql> CREATE TABLE EMPLOYEE_SERVICE
+    -> (
+    -> ID  INT UNSIGNED  NOT NULL AUTO_INCREMENT,
+    -> NAME    VARCHAR(150)   NOT NULL,
+    -> SALARY    DOUBLE NOT NULL,
+    -> START     DATE NOT NULL,
+    -> PRIMARY  KEY (ID)
+    -> );
+Query OK, 0 rows affected (1.31 sec)
+
+
+------UC3-------------Inserting data
+
+
+mysql> DESCRIBE employee_service;
++--------+--------------+------+-----+---------+----------------+
+| Field  | Type         | Null | Key | Default | Extra          |
++--------+--------------+------+-----+---------+----------------+
+| ID     | int unsigned | NO   | PRI | NULL    | auto_increment |
+| NAME   | varchar(150) | NO   |     | NULL    |                |
+| SALARY | double       | NO   |     | NULL    |                |
+| START  | date         | NO   |     | NULL    |                |
++--------+--------------+------+-----+---------+----------------+
+4 rows in set (0.17 sec)
+
+mysql> INSERT INTO employee_service
+    -> (
+    -> name,salary,start)
+    -> values
+    -> ('Bill', 1000000.00, '2018-01-03'),
+    -> ('Terisa', 2000000.00, '2019-11-13'),
+    -> ('Charlie', 3000000.00, '2020-05-21');
+Query OK, 3 rows affected (0.19 sec)
+Records: 3  Duplicates: 0  Warnings: 0
+
+
+----------UC4----------------retrieving data
+
+mysql> SELECT * FROM EMPLOYEE_SERVICE;
++----+---------+--------+---------+------------+
+| ID | NAME    | GENDER | SALARY  | START      |
++----+---------+--------+---------+------------+
+|  1 | Bill    | NULL   | 1000000 | 2018-01-03 |
+|  2 | Terisa  | F      | 2000000 | 2019-11-13 |
+|  3 | Charlie | NULL   | 3000000 | 2020-05-21 |
++----+---------+--------+---------+------------+
+3 rows in set (0.00 sec)
+
+
+---------UC5--------------retrieving particular data
+
+mysql> SELECT salary FROM employee_service
+    -> WHERE name = 'Bill';
++---------+
+| salary  |
++---------+
+| 1000000 |
++---------+
+1 row in set (0.00 sec)
+
+mysql> SELECT * FROM EMPLOYEE_SERVICE
+    -> WHERE start BETWEEN CAST('2018-01-01' AS DATE)
+    -> AND DATE(NOW());
++----+---------+---------+------------+
+| ID | NAME    | SALARY  | START      |
++----+---------+---------+------------+
+|  1 | Bill    | 1000000 | 2018-01-03 |
+|  2 | Terisa  | 2000000 | 2019-11-13 |
+|  3 | Charlie | 3000000 | 2020-05-21 |
++----+---------+---------+------------+
+3 rows in set (0.33 sec)
+
+
+
+-----------UC6-----------add gender attribute to table
+
+mysql> ALTER TABLE EMPLOYEE_SERVICE
+    -> ADD GENDER CHAR(1) AFTER NAME;
+Query OK, 0 rows affected (2.16 sec)
+Records: 0  Duplicates: 0  Warnings: 0
+
+mysql> SELECT * FROM EMPLOYEE_SERVICE;
++----+---------+--------+---------+------------+
+| ID | NAME    | GENDER | SALARY  | START      |
++----+---------+--------+---------+------------+
+|  1 | Bill    | NULL   | 1000000 | 2018-01-03 |
+|  2 | Terisa  | NULL   | 2000000 | 2019-11-13 |
+|  3 | Charlie | NULL   | 3000000 | 2020-05-21 |
++----+---------+--------+---------+------------+
+3 rows in set (0.00 sec)
+
+mysql> DESCRIBE EMPLOYEE_SERVICE;
++--------+--------------+------+-----+---------+----------------+
+| Field  | Type         | Null | Key | Default | Extra          |
++--------+--------------+------+-----+---------+----------------+
+| ID     | int unsigned | NO   | PRI | NULL    | auto_increment |
+| NAME   | varchar(150) | NO   |     | NULL    |                |
+| GENDER | char(1)      | YES  |     | NULL    |                |
+| SALARY | double       | NO   |     | NULL    |                |
+| START  | date         | NO   |     | NULL    |                |
++--------+--------------+------+-----+---------+----------------+
+5 rows in set (0.00 sec)
+
+
+mysql> UPDATE EMPLOYEE_SERVICE SET GENDER = 'F'
+    -> WHERE NAME = 'TERISA';
+Query OK, 1 row affected (1.62 sec)
+Rows matched: 1  Changed: 1  Warnings: 0
+
+mysql> SELECT * FROM EMPLOYEE_SERVICE;
++----+---------+--------+---------+------------+
+| ID | NAME    | GENDER | SALARY  | START      |
++----+---------+--------+---------+------------+
+|  1 | Bill    | NULL   | 1000000 | 2018-01-03 |
+|  2 | Terisa  | F      | 2000000 | 2019-11-13 |
+|  3 | Charlie | NULL   | 3000000 | 2020-05-21 |
++----+---------+--------+---------+------------+
+3 rows in set (0.00 sec)
+
+mysql> UPDATE EMPLOYEE_SERVICE SET GENDER = 'M'
+    -> WHERE NAME = 'BILL' OR NAME = 'CHARLIE';
+Query OK, 2 rows affected (1.61 sec)
+Rows matched: 2  Changed: 2  Warnings: 0
+
+mysql> SELECT * FROM EMPLOYEE_SERVICE;
++----+---------+--------+---------+------------+
+| ID | NAME    | GENDER | SALARY  | START      |
++----+---------+--------+---------+------------+
+|  1 | Bill    | M      | 1000000 | 2018-01-03 |
+|  2 | Terisa  | F      | 2000000 | 2019-11-13 |
+|  3 | Charlie | M      | 3000000 | 2020-05-21 |
++----+---------+--------+---------+------------+
+3 rows in set (0.00 sec)
+
+
+-------UC7--------------FIND sum, max, min, avg etc
+
+mysql> SELECT SUM(SALARY), AVG(SALARY),MIN(SALARY),
+    -> MAX(SALARY) FROM EMPLOYEE_SERVICE;
++-------------+--------------------+-------------+-------------+
+| SUM(SALARY) | AVG(SALARY)        | MIN(SALARY) | MAX(SALARY) |
++-------------+--------------------+-------------+-------------+
+|     7000000 | 2333333.3333333335 |     1000000 |     3000000 |
++-------------+--------------------+-------------+-------------+
+1 row in set (0.00 sec)
+
+mysql> SELECT GENDER, SUM(SALARY) FROM EMPLOYEE_SERVICE
+    -> GROUP BY GENDER;
++--------+-------------+
+| GENDER | SUM(SALARY) |
++--------+-------------+
+| M      |     4000000 |
+| F      |     3000000 |
++--------+-------------+
+2 rows in set (0.00 sec)
+
+mysql> SELECT GENDER, SUM(SALARY) FROM EMPLOYEE_SERVICE
+    -> WHERE GENDER = 'F'
+    -> GROUP BY GENDER;
++--------+-------------+
+| GENDER | SUM(SALARY) |
++--------+-------------+
+| F      |     3000000 |
++--------+-------------+
+1 row in set (0.00 sec)
+
+SECTION 2: ER DIAGRAM
+
+-----------UC8---------------
+
+
+mysql>
+
+SELECT * FROM EMPLOYEE_SERVICE;
++----+---------+--------+-------------+---------+------------+---------+------------+
+| ID | NAME    | GENDER | PHONENUMBER | ADDRESS | DEPARTMENT | SALARY  | START      |
++----+---------+--------+-------------+---------+------------+---------+------------+
+|  1 | Bill    | M      | 9191919181  | NULL    | HR         | 1000000 | 2018-01-03 |
+|  2 | Terisa  | F      | 9876543210  | NULL    | TL         | 3000000 | 2019-11-13 |
+|  3 | Charlie | M      | 9876544545  | NULL    | TL         | 3000000 | 2020-05-21 |
++----+---------+--------+-------------+---------+------------+---------+------------+
+3 rows in set (0.01 sec)
+
+-----------------UC9-------------
+
+mysql> ALTER TABLE EMPLOYEE_SERVICE
+    -> ADD COLUMN INCOME_TAX DOUBLE NOT NULL AFTER TAXABLEPAY,
+    -> ADD COLUMN NET_PAY DOUBLE NOT NULL AFTER INCOME_TAX;
+Query OK, 0 rows affected (1.98 sec)
+Records: 0  Duplicates: 0  Warnings: 0
+
+mysql> DESCRIBE EMPLOYEE_SERVICE;
++-------------+--------------+------+-----+---------+----------------+
+| Field       | Type         | Null | Key | Default | Extra          |
++-------------+--------------+------+-----+---------+----------------+
+| ID          | int unsigned | NO   | PRI | NULL    | auto_increment |
+| NAME        | varchar(150) | NO   |     | NULL    |                |
+| GENDER      | char(1)      | YES  |     | NULL    |                |
+| PHONENUMBER | varchar(20)  | NO   |     | NULL    |                |
+| ADDRESS     | varchar(25)  | YES  |     | NULL    |                |
+| DEPARTMENT  | varchar(5)   | NO   |     | NULL    |                |
+| BASIC_PAY   | double       | YES  |     | NULL    |                |
+| DEDUCTIONS  | double       | NO   |     | NULL    |                |
+| TAXABLEPAY  | double       | NO   |     | NULL    |                |
+| INCOME_TAX  | double       | NO   |     | NULL    |                |
+| NET_PAY     | double       | NO   |     | NULL    |                |
+| SALARY      | double       | NO   |     | NULL    |                |
+| START       | date         | NO   |     | NULL    |                |
++-------------+--------------+------+-----+---------+----------------+
+13 rows in set (0.02 sec)
+
+----------UC10---------------
+
+
+mysql> SELECT * FROM EMPLOYEE_SERVICE
+    -> ;
++----+---------+--------+-------------+---------+------------+-----------+------------+------------+------------+---------+---------+------------+
+| ID | NAME    | GENDER | PHONENUMBER | ADDRESS | DEPARTMENT | BASIC_PAY | DEDUCTIONS | TAXABLEPAY | INCOME_TAX | NET_PAY | SALARY  | START      |
++----+---------+--------+-------------+---------+------------+-----------+------------+------------+------------+---------+---------+------------+
+|  1 | Bill    | M      | 9191919181  | NULL    | HR         |      NULL |       1234 |          0 |          0 |       0 | 1000000 | 2018-01-03 |
+|  2 | Terisa  | F      | 9876543210  | Mumbai  | SALES      |    200000 |          0 |          0 |          0 |       0 | 3000000 | 2019-11-13 |
+|  3 | Charlie | M      | 9876544545  | NULL    | TL         |      NULL |          0 |          0 |          0 |       0 | 3000000 | 2020-05-21 |
++----+---------+--------+-------------+---------+------------+-----------+------------+------------+------------+---------+---------+------------+
+3 rows in set (0.02 sec)
