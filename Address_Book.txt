@@ -1,0 +1,184 @@
+---> UC1 - creating a AddressBook Service database
+mysql> CREATE DATABASE AddressBook_Service;
+
+mysql> show databases;
++---------------------+
+| Database            |
++---------------------+
+| addressbook_service |
+| information_schema  |
+| mysql               |
+| payroll_service     |
+| performance_schema  |
+| sakila              |
+| sys                 |
+| world               |
++---------------------+
+
+mysql> use addressbook_service;
+
+mysql> select database();
++---------------------+
+| database()          |
++---------------------+
+| addressbook_service |
++---------------------+
+
+
+--> UC2 creating table in DB and adding 
+attributes to the table 
+
+mysql> CREATE TABLE address_book
+    -> (
+    -> firstname VARCHAR(20) NOT NULL,
+    -> lastname VARCHAR(20) NOT NULL,
+    -> address VARCHAR(20) NOT NULL,
+    -> city VARCHAR(20) NOT NULL,
+    -> state VARCHAR(20) NOT NULL,
+    -> zip INT UNSIGNED NOT NULL,
+    -> phonenumber BIGINT  NOT NULL,
+    -> email VARCHAR(40) NOT NULL
+    -> );
+Query OK, 0 rows affected (0.49 sec)
+
+mysql> describe address_book;
++-------------+--------------+------+-----+---------+-------+
+| Field       | Type         | Null | Key | Default | Extra |
++-------------+--------------+------+-----+---------+-------+
+| firstname   | varchar(20)  | NO   |     | NULL    |       |
+| lastname    | varchar(20)  | NO   |     | NULL    |       |
+| address     | varchar(20)  | NO   |     | NULL    |       |
+| city        | varchar(20)  | NO   |     | NULL    |       |
+| state       | varchar(20)  | NO   |     | NULL    |       |
+| zip         | int unsigned | NO   |     | NULL    |       |
+| phonenumber | bigint       | NO   |     | NULL    |       |
+| email       | varchar(40)  | NO   |     | NULL    |       |
++-------------+--------------+------+-----+---------+-------+
+
+--> UC3 ability to insert new contact
+
+mysql> INSERT INTO address_book
+    -> (firstname,lastname,address,city,state,
+    -> zip,phonenumber,email)
+    -> VALUES
+    -> ('Akula', 'Venkata', '42-264/55','hyderabad','telangana',
+    -> 500040,9123456789,'ss@gmail.com');
+Query OK, 1 row affected (0.06 sec)
+
+mysql> SELECT * FROM address_book;
++-----------+----------+-----------+-----------+-----------+--------+-------------+--------------+
+| firstname | lastname | address   | city      | state     | zip    | phonenumber | email        |
++-----------+----------+-----------+-----------+-----------+--------+-------------+--------------+
+| Akula     | Venkata  | 42-264/55 | hyderabad | telangana | 500040 |  9123456789 | ss@gmail.com |
++-----------+----------+-----------+-----------+-----------+--------+-------------+--------------+
+
+-->UC4 EDIT CONTACT
+
+mysql> UPDATE address_book SET phonenumber = 9999911111
+    -> WHERE firstname = 'Akula';
+Query OK, 1 row affected (0.39 sec)
+Rows matched: 1  Changed: 1  Warnings: 0
+
+mysql> SELECT * FROM address_book;
++-----------+----------+-----------+-----------+-----------+--------+-------------+--------------+
+| firstname | lastname | address   | city      | state     | zip    | phonenumber | email        |
++-----------+----------+-----------+-----------+-----------+--------+-------------+--------------+
+| Akula     | Venkata  | 42-264/55 | hyderabad | telangana | 500040 |  9999911111 | ss@gmail.com |
++-----------+----------+-----------+-----------+-----------+--------+-------------+--------------+
+
+-->UC5 Delete contact from table
+
+mysql> DELETE FROM address_book
+    -> where firstname = 'Akula';
+Query OK, 1 row affected (0.06 sec)
+
+mysql> SELECT * FROM address_book;
+Empty set (0.00 sec)
+
+--> UC6 retrieve date USING state and city
+
+mysql> SELECT * FROM address_book
+    -> WHERE STATE = 'TELANGANA' OR CITY = 'HYDERABAD';
++-----------+----------+------------+-----------+-----------+---------+-------------+--------------+
+| firstname | lastname | address    | city      | state     | zip     | phonenumber | email        |
++-----------+----------+------------+-----------+-----------+---------+-------------+--------------+
+| Akula     | Venkata  | 42-264/55  | hyderabad | telangana |  500040 |  9123456789 | ss@gmail.com |
+| robert    | Sainath  | 422-364/55 | hyderabad | telangana | 5666689 |   343434090 | pp@gmail.com |
++-----------+----------+------------+-----------+-----------+---------+-------------+--------------+
+
+
+---> UC7 retrieve size of table
+
+mysql> SELECT CITY, COUNT(*) FROM address_book
+    -> GROUP BY CITY;
++-----------+----------+
+| CITY      | COUNT(*) |
++-----------+----------+
+| hyderabad |        2 |
++-----------+----------+
+
+mysql> SELECT STATE , COUNT(*) FROM address_book
+    -> GROUP BY STATE;
++-----------+----------+
+| STATE     | COUNT(*) |
++-----------+----------+
+| telangana |        2 |
++-----------+----------+
+
+
+-->UC8 sorting name 
+
+mysql> SELECT * FROM address_book
+    -> WHERE CITY = 'HYDERABAD'
+    -> ORDER BY firstname ASC;
++-----------+----------+------------+-----------+-----------+---------+-------------+--------------+
+| firstname | lastname | address    | city      | state     | zip     | phonenumber | email        |
++-----------+----------+------------+-----------+-----------+---------+-------------+--------------+
+| Akula     | Venkata  | 42-264/55  | hyderabad | telangana |  500040 |  9123456789 | ss@gmail.com |
+| robert    | Sainath  | 422-364/55 | hyderabad | telangana | 5666689 |   343434090 | pp@gmail.com |
++-----------+----------+------------+-----------+-----------+---------+-------------+--------------+
+
+
+--> UC9 
+
+mysql> ALTER TABLE address_book
+    ->ADD COLUMN type VARCHAR(25) AFTER lastname;
+
+mysql> UPDATE address_book SET TYPE = 'FAMILY'
+    -> WHERE firstname = 'Akula' OR firstname = 'Robert';
+Query OK, 2 rows affected (0.04 sec)
+Rows matched: 2  Changed: 2  Warnings: 0
+
+mysql> select * from address_book;
++-----------+----------+--------+------------+-----------+-----------+---------+-------------+--------------+
+| firstname | lastname | type   | address    | city      | state     | zip     | phonenumber | email        |
++-----------+----------+--------+------------+-----------+-----------+---------+-------------+--------------+
+| Akula     | Venkata  | FAMILY | 42-264/55  | hyderabad | telangana |  500040 |  9123456789 | ss@gmail.com |
+| robert    | Sainath  | FAMILY | 422-364/55 | hyderabad | telangana | 5666689 |   343434090 | pp@gmail.com |
++-----------+----------+--------+------------+-----------+-----------+---------+-------------+--------------+
+
+-->UC10
+
+mysql> SELECT TYPE , COUNT(*) FROM address_book
+    -> GROUP BY type;
++--------+----------+
+| TYPE   | COUNT(*) |
++--------+----------+
+| FAMILY |        2 |
++--------+----------+
+
+-->UC11 
+
+mysql> UPDATE address_book SET type = 'FRIEND'
+    -> WHERE firstname = 'Kittu';
+Query OK, 1 row affected (0.04 sec)
+Rows matched: 1  Changed: 1  Warnings: 0
+
+mysql> select * from address_book;
++-----------+----------+--------+------------+-----------+-----------+---------+-------------+--------------+
+| firstname | lastname | type   | address    | city      | state     | zip     | phonenumber | email        |
++-----------+----------+--------+------------+-----------+-----------+---------+-------------+--------------+
+| Akula     | Venkata  | FAMILY | 42-264/55  | hyderabad | telangana |  500040 |  9123456789 | ss@gmail.com |
+| robert    | Sainath  | FAMILY | 422-364/55 | hyderabad | telangana | 5666689 |   343434090 | pp@gmail.com |
+| kittu     | kamal    | FRIEND | 33343434   | banglore  | karnataka |  500060 |  2323232323 | ll@gmail.com |
++-----------+----------+--------+------------+-----------+-----------+---------+-------------+--------------+
